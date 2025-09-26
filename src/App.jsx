@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import Card from './components/Card';
+import Congrats from './components/Congrats';
 
 function App() {
   const defaultCards = [
@@ -37,6 +38,8 @@ function App() {
     }
   ]
 
+  const [showCongrats, setShowCongrats] = useState(false)
+
   const [cards, setCards] = useState([]);
   const [selectedOne, setSelectedOne] = useState(null);
   const [selectedTwo, setSelectedTwo] = useState(null);
@@ -44,13 +47,13 @@ function App() {
 
   const prepareCards = () => {
     const sortedCards = [...defaultCards, ...defaultCards].sort(() => 0.5 - Math.random())
-    .map((card)=>({...card, id: Math.random()}))
+      .map((card) => ({ ...card, id: Math.random() }))
     setCards(sortedCards);
     resetState()
   };
 
-  const handleSelected = (card)=>{
-    if(disabled) return true;
+  const handleSelected = (card) => {
+    if (disabled) return true;
     selectedOne ? setSelectedTwo(card) : setSelectedOne(card);
   }
 
@@ -60,33 +63,41 @@ function App() {
 
 
   useEffect(() => {
-    if(selectedOne && selectedTwo ) {
+    if (selectedOne && selectedTwo) {
       setDisabled(true)
-      if(selectedOne.path == selectedTwo.path){
+      if (selectedOne.path == selectedTwo.path) {
         setCards((prev) => {
-          return prev.map((card)=>{
-            if(card.path == selectedOne.path){
-              return {...card , matched: true}
-            }else{
+          return prev.map((card) => {
+            if (card.path == selectedOne.path) {
+              return { ...card, matched: true }
+            } else {
               return card
             }
           })
         })
         resetState()
-      }else{
+      } else {
         setTimeout(() => {
           resetState()
         }, 1000);
       }
     }
   }, [selectedOne, selectedTwo])
-  
-  const resetState = ()=>{
+
+  const resetState = () => {
     setSelectedOne(null)
     setSelectedTwo(null)
     setDisabled(false)
+    setShowCongrats(false)
   }
 
+  useEffect(() => {
+    if ( cards.length>1 && cards.every((card) => card.matched)) {
+      setTimeout(() => {
+        setShowCongrats(true)
+      }, 1000);
+    }
+  }, [cards])
 
   return (
     <section className='flex flex-col items-center justify-center gap-5 mt-10' >
@@ -94,9 +105,10 @@ function App() {
       <button className='bg-[#00ADB5] px-3 py-2 rounded-2xl hover:translate-y-1 hover:scale-105 transition-all' onClick={prepareCards} >Oyunu başlat</button>
       <div className='grid grid-cols-4 gap-2 mt-10 '>
         {cards.map((card, ind) => (
-          <Card card={card} key={ind} handleSelected={handleSelected} rotated={card==selectedOne || card== selectedTwo || card.matched } disabled={disabled} />
+          <Card card={card} key={ind} handleSelected={handleSelected} rotated={card == selectedOne || card == selectedTwo || card.matched} disabled={disabled} />
         ))}
       </div>
+      {showCongrats && <Congrats setShowCongrats={setShowCongrats} />}
     </section>
   )
 }
