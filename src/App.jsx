@@ -38,6 +38,10 @@ function App() {
     }
   ]
 
+  const [count, setCount] = useState(0)
+  const [correctCount, setCorrectCount] = useState(0)
+
+
   const [showCongrats, setShowCongrats] = useState(false)
 
   const [cards, setCards] = useState([]);
@@ -45,11 +49,15 @@ function App() {
   const [selectedTwo, setSelectedTwo] = useState(null);
   const [disabled, setDisabled] = useState(false);
 
+
+
+
   const prepareCards = () => {
     const sortedCards = [...defaultCards, ...defaultCards].sort(() => 0.5 - Math.random())
       .map((card) => ({ ...card, id: Math.random() }))
     setCards(sortedCards);
-    resetState()
+    resetState();
+    resetCount();
   };
 
   const handleSelected = (card) => {
@@ -64,8 +72,10 @@ function App() {
 
   useEffect(() => {
     if (selectedOne && selectedTwo) {
+      setCount(count + 1)
       setDisabled(true)
       if (selectedOne.path == selectedTwo.path) {
+        setCorrectCount(correctCount + 10)
         setCards((prev) => {
           return prev.map((card) => {
             if (card.path == selectedOne.path) {
@@ -77,12 +87,18 @@ function App() {
         })
         resetState()
       } else {
+        setCorrectCount(correctCount - 2)
         setTimeout(() => {
           resetState()
         }, 1000);
       }
     }
   }, [selectedOne, selectedTwo])
+
+  const resetCount = () => {
+    setCount(0);
+    setCorrectCount(0);
+  }
 
   const resetState = () => {
     setSelectedOne(null)
@@ -92,7 +108,7 @@ function App() {
   }
 
   useEffect(() => {
-    if ( cards.length>1 && cards.every((card) => card.matched)) {
+    if (cards.length > 1 && cards.every((card) => card.matched)) {
       setTimeout(() => {
         setShowCongrats(true)
       }, 1000);
@@ -102,13 +118,17 @@ function App() {
   return (
     <section className='flex flex-col items-center justify-center gap-5 mt-10' >
       <h1 className='text-3xl font-semibold text-center'>Tahmin etme oyunu</h1>
-      <button className='bg-[#00ADB5] px-3 py-2 rounded-2xl hover:translate-y-1 hover:scale-105 transition-all' onClick={prepareCards} >Oyunu başlat</button>
+      <p className='font-semibold text-2xl text-center'>Hamle sayısı : {count} </p>
+      <div className='flex flex-row gap-5 ' >
+        <p className='font-semibold text-2xl text-center mr-5 flex gap-2'>Puan : <p className=''>{correctCount}</p></p>
+      </div>
       <div className='grid grid-cols-4 gap-2 mt-10 '>
         {cards.map((card, ind) => (
           <Card card={card} key={ind} handleSelected={handleSelected} rotated={card == selectedOne || card == selectedTwo || card.matched} disabled={disabled} />
         ))}
       </div>
-      {showCongrats && <Congrats setShowCongrats={setShowCongrats} />}
+      <button className='bg-[#00ADB5] mt-2 px-4 py-3 rounded-2xl hover:translate-y-1 hover:scale-105 transition-all text-xl font-semibold mb-12' onClick={prepareCards} >Oyunu başlat</button>
+      {showCongrats && <Congrats setShowCongrats={setShowCongrats} prepareCards={prepareCards} />}
     </section>
   )
 }

@@ -10,13 +10,13 @@ body{
 }
 .card .back{
     transform: rotateY(0deg);
-    transition: 300ms all ease-in;
+    transition: 120ms all ease-in;
 }
 
 .card .front{
     position: absolute;
     transform: rotateY(90deg);
-    transition: 300ms all ease-in;
+    transition: 120ms all ease-in;
 }
 
 .rotated .front{
