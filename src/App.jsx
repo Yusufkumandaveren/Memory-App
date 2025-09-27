@@ -48,9 +48,26 @@ function App() {
   const [selectedOne, setSelectedOne] = useState(null);
   const [selectedTwo, setSelectedTwo] = useState(null);
   const [disabled, setDisabled] = useState(false);
+; 
+  const [time, setTime] = useState(60);
+  const [isActive, setIsActive] = useState(false);
 
+  useEffect(() => {
+    let timer ;
+    if ( isActive && time > 0) {
+      timer = setInterval(() => {
+        setTime((prev) => prev - 1);
+      }, 1000);
+    }
 
+    if (time === 0) {
+      setIsActive(false);
+      setShowCongrats(false);
+      prepareCards()
+    }
 
+    return () => clearInterval(timer);
+  }, [isActive, time]);
 
   const prepareCards = () => {
     const sortedCards = [...defaultCards, ...defaultCards].sort(() => 0.5 - Math.random())
@@ -58,10 +75,15 @@ function App() {
     setCards(sortedCards);
     resetState();
     resetCount();
+    setTime(60)
+    setIsActive(false)
   };
 
   const handleSelected = (card) => {
     if (disabled) return true;
+    if(!isActive){
+      setIsActive(true)
+    }
     selectedOne ? setSelectedTwo(card) : setSelectedOne(card);
   }
 
@@ -111,7 +133,7 @@ function App() {
     if (cards.length > 1 && cards.every((card) => card.matched)) {
       setTimeout(() => {
         setShowCongrats(true)
-      }, 1000);
+      }, 500);
     }
   }, [cards])
 
@@ -121,6 +143,11 @@ function App() {
       <p className='font-semibold text-2xl text-center'>Hamle sayısı : {count} </p>
       <div className='flex flex-row gap-5 ' >
         <p className='font-semibold text-2xl text-center mr-5 flex gap-2'>Puan : <p className=''>{correctCount}</p></p>
+        <p className="font-semibold text-2xl text-center">
+          Kalan Süre: <span className={time <= 10 ? "text-red-600" : "text-emerald-700"}>
+            {time} sn
+          </span>
+        </p>
       </div>
       <div className='grid grid-cols-4 gap-2 mt-10 '>
         {cards.map((card, ind) => (
